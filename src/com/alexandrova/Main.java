@@ -1,17 +1,17 @@
 package com.alexandrova;
-//import java.lang.reflect.Array;
-
 
 import java.util.*;
 
 public class Main {
-    static ArrayList<String> operands = new ArrayList<>();
+    private static final int MAX_ATTEMPTS = 1000;
+    static int attempt;
+    private static ArrayList<String> mOperands = new ArrayList<>();
 
     static {
-        operands.add("+");
-        operands.add("-");
-        operands.add("*");
-        operands.add("/");
+        mOperands.add("+");
+        mOperands.add("-");
+        mOperands.add("*");
+        mOperands.add("/");
     }
 
     public static void main(String[] args) {
@@ -33,28 +33,20 @@ public class Main {
                 if (!deque.isEmpty()) {
                     String popped = deque.pollLast();
                     while (popped != null && !popped.equals("(")) {
-                        System.out.println("Add to string: " + popped);
+//                        System.out.println("Add to string: " + popped);
                         outStr.add(popped);
                         popped = deque.pollLast();
                     }
-//                        else {
-//                            deque.removeLast();
-//                            //а если это скобка, то мы удаляем оба элемента
-//                        }
                 } else {
-                    System.out.println("Wrong expression!!");
+                    System.err.println("Wrong expression!!");
                 }
             }
 
-
-            //operands.add("(");
-            //     operands.add(")");
-            if (operands.contains(String.valueOf(currentChar))) {
+            if (mOperands.contains(String.valueOf(currentChar))) {
                 if (!deque.isEmpty()) {
                     String popOp = deque.pollLast();
                     int priorityP = getPrior(popOp);
                     int priorityA = getPrior(String.valueOf(currentChar));
-
 
                     if (priorityA <= priorityP) {
                         outStr.add(popOp);
@@ -69,20 +61,18 @@ public class Main {
                 }
 
             }
-            System.out.println(outStr + " " + deque);
+//            System.out.println(outStr + " " + deque);
         }
-        for (int i = 0; i < deque.size(); i++) {
+        for (int i = 0; i <= deque.size(); i++) {
             String elFrS = deque.pollLast();
             outStr.add(elFrS);
         }
-        System.out.println(outStr);
+//        System.out.println(outStr);
         attempt = 0;
-        calculateIt(outStr);
+        System.out.printf("Result = %.4f", calculateIt(outStr));
     }
 
-    private static final int MAX_ATTEMPTS = 100;
-
-    private static void calculateIt(List<String> outStr) {
+    private static float calculateIt(List<String> outStr) {
         float a;
         float b;
         int aPosition;
@@ -90,44 +80,46 @@ public class Main {
         for (int i = 0; i < outStr.size(); i++) {
             aPosition = i - 2;
             bPosition = i - 1;
-            if (operands.contains(outStr.get(i))) {
+            if (mOperands.contains(outStr.get(i))) {
                 if (bPosition >= 0 && aPosition >= 0) {
                     a = Float.parseFloat(outStr.get(aPosition));
                     b = Float.parseFloat(outStr.get(bPosition));
                     float result = operate(outStr.get(i), a, b);
-                    System.out.println("Setting up position: " + i + " value: " + String.valueOf(result));
+//                    System.out.println("Setting up position: " + i + " value: " + String.valueOf(result));
                     outStr.set(i, String.valueOf(result));
                     outStr.set(aPosition, null);
                     outStr.set(bPosition, null);
                     break;
                 } else {
-                    System.out.println("Error ");
+                    System.err.println("Error");
                 }
-            } else {
-                System.out.println(outStr);
+//            } else {
+//                System.out.println(outStr);
             }
         }
-        if (outStr.size() > 3) {
+        if (outStr.size() >= 3 && ++attempt < MAX_ATTEMPTS) {
             cleanUpList(outStr);
             calculateIt(outStr);
         }
+        if (outStr.size() == 1) {
+            return Float.parseFloat(outStr.get(0));
+        }
+        throw new IllegalStateException("Something wrong. Please check your input");
     }
 
     private static void cleanUpList(List<String> outStr) {
         for (int idx = 0; idx < outStr.size(); idx++) {
             if (outStr.get(idx) == null || outStr.get(idx).isEmpty()) {
-                System.out.println("Remove null on index : " + idx);
+//                System.out.println("Remove null on index : " + idx);
                 outStr.remove(idx);
                 cleanUpList(outStr);
             }
         }
-        System.out.println("Clean up complete. Result: " + outStr);
+//        System.out.println("Clean up complete. Result: " + outStr);
     }
 
-    static int attempt;
-
     private static float operate(String operand, float a, float b) {
-        System.out.println("Execute [" + operand + "] on a: " + a + " and b: " + b);
+//        System.out.println("Execute [" + operand + "] on a: " + a + " and b: " + b);
         switch (operand) {
             case "+":
                 return a + b;
@@ -145,9 +137,6 @@ public class Main {
 
     private static int getPrior(String operand) {
         switch (operand) {
-            //  case ")":
-            //case "(":
-            // return 1;
             case "+":
             case "-":
                 return 2;
